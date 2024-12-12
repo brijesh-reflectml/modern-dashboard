@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import { Bar } from "recharts";
 import { BarChart } from "recharts";
@@ -22,122 +20,40 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
-
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+import CustomPieChart from "@/components/CustomPieChart";
+import { CustomBarGraph } from "@/components/CustomBarGraph";
+import { Separator } from "@/components/ui/separator";
 
 export default function HomePage() {
-  const [data, setData] = useState<{ value: number; label?: string }[]>([]);
-
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
-
   return (
     <div className="w-full  p-12">
-      <Card className="w-full h-full bg-gradient-to-br from-[#202020] via-[#272727] to-[#171817] border-b-0 border-x-0 border-t border-t-white/30 shadow-[0_20px_50px_rgba(255,_255,_255,_0.3)] backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-gray-100">
-            Card Title
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-row items-center justify-between">
-            <div className="w-1/2 text-center">
-              <p className="text-gray-300">Content goes here</p>
-              <div className="w-full h-64"></div>
+     
+      <Card variant="gradient" className="mb-24">
+        <CardContent className="py-6">
+          <h1 className="text-2xl">Yearly Reports</h1>
+          <p className="text-gray-400 mt-2">2023-24</p>
+          <Separator className="my-4 " />
+          <div className="flex flex-row w-full items-center">
+            <div className="w-1/2  text-justify">
+              <p className="text-gray-300 text-xl font-normal">
+                The dataset represents the number of users (in thousands) engaging with popular AI tools and software. The tools range from conversational AI to generative visual content and collaborative machine learning platforms. Each tool's user base size indicates its popularity and relevance in various domains.
+              </p>
+              <h2 className="text-lg font-normal text-gray-200 mt-12 mb-4">Observations:</h2>
+              <ul className="list-disc text-gray-400 text-base mt-2">
+                <li className="my-2">ChatGPT dominates in user engagement, reflecting its widespread adoption across industries.</li>
+                <li>DALL·E and MidJourney highlight the growing interest in generative AI for visual content.</li>
+                <li className="my-2">Hugging Face's focus on collaboration and open-source AI development ensures its relevance in the tech ecosystem.</li>
+                <li>Stable Diffusion, despite being slightly behind in user numbers, remains a favorite among professionals for its photorealistic image generation capabilities.</li>
+              </ul>
             </div>
-            <div className="w-1/2 text-center flex items-center justify-center">
-              <Image
-                src="/images/machines.png"
-                alt="Machines"
-                width={500}
-                height={250}
-                className="rounded-lg opacity-10"
-              />
+            <div className="w-1/2 text-center ">
+              <CustomPieChart />
             </div>
           </div>
+          {/* <CustomPieChart /> */}
+          <CustomBarGraph variant="default"/>
         </CardContent>
       </Card>
-      <ChartContainer
-        config={chartConfig}
-        className="mx-auto aspect-square max-h-[500px]"
-      >
-        <PieChart width={500} height={500}>
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Pie
-            data={chartData}
-            dataKey="visitors"
-            nameKey="browser"
-            innerRadius={120}
-            strokeWidth={5}
-          >
-            <Label
-              content={({ viewBox }) => {
-                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                  return (
-                    <text
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                    >
-                      <tspan
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        className="fill-foreground text-3xl font-bold"
-                      >
-                        {totalVisitors.toLocaleString()}
-                      </tspan>
-                      <tspan
-                        x={viewBox.cx}
-                        y={(viewBox.cy || 0) + 24}
-                        className="fill-muted-foreground"
-                      >
-                        Visitors
-                      </tspan>
-                    </text>
-                  );
-                }
-              }}
-            />
-          </Pie>
-        </PieChart>
-      </ChartContainer>
     </div>
   );
 }
