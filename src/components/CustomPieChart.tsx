@@ -1,124 +1,95 @@
 "use client";
 
-import Image from "next/image";
-import { Bar } from "recharts";
-import { BarChart } from "recharts";
-import { useEffect, useState } from "react";
-import { BarChart3Icon, LineChart } from "lucide-react";
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
-import { Label, Pie, PieChart } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
 
 interface CustomPieChartProps {
-  // Define any props if needed
+  variant?: "default" | "themed";
 }
 
-const CustomPieChart: React.FC<CustomPieChartProps> = (props) => {
-  const chartData = [
-    { tool: "ChatGPT", users: 320, fill: "#10A37F" },
-    { tool: "DALL-E", users: 245, fill: "#FF6F61" },
-    { tool: "Stable Diffusion", users: 180, fill: "#6C63FF" },
-    { tool: "MidJourney", users: 210, fill: "#F4A261" },
-    { tool: "Hugging Face", users: 190, fill: "#FFCA28" }
-]
+const chartDataOG = [
+  { name: "ChatGPT", value: 320, fill: "#10A37F" },
+  { name: "DALL-E", value: 245, fill: "#FF6F61" },
+  { name: "Stable Diffusion", value: 180, fill: "#6C63FF" },
+  { name: "MidJourney", value: 210, fill: "#F4A261" },
+  { name: "Hugging Face", value: 190, fill: "#FFCA28" },
+];
 
-const chartConfig = {
-    users: {
-      label: "Users (in thousands)",
-    },
-    chatgpt: {
-      label: "ChatGPT",
-      color: "hsl(var(--chart-1))",
-    },
-    dalle: {
-      label: "DALL·E",
-      color: "hsl(var(--chart-2))",
-    },
-    stableDiffusion: {
-      label: "Stable Diffusion",
-      color: "hsl(var(--chart-3))",
-    },
-    midJourney: {
-      label: "MidJourney",
-      color: "hsl(var(--chart-4))",
-    },
-    huggingFace: {
-      label: "Hugging Face",
-      color: "hsl(var(--chart-5))",
-    },
-  } satisfies ChartConfig;
+const themedChartData = [
+  { name: "ChatGPT", value: 320, fill: "#008080" },
+  { name: "DALL-E", value: 245, fill: "#006666" },
+  { name: "Stable Diffusion", value: 180, fill: "#CCCCCC" },
+  { name: "MidJourney", value: 210, fill: "#888888" },
+  { name: "Hugging Face", value: 190, fill: "#555555" },
+];
 
-  const [data, setData] = useState<{ value: number; label?: string }[]>([]);
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10">
+        <p className="text-white font-medium">{payload[0].name}</p>
+        <p className="text-gray-300">
+          {payload[0].value.toLocaleString()} users
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
+export function CustomPieChart({ variant = "default" }: CustomPieChartProps) {
+  const chartData = variant === "themed" ? themedChartData : chartDataOG;
   const totalUsers = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.users, 0);
-  }, []);
+    return chartData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [chartData]);
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="mx-auto aspect-square max-h-[500px]"
-    >
-      <PieChart width={350} height={350}>
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent hideLabel />}
-        />
+    <div className="w-full h-full flex items-center justify-center">
+      <PieChart width={360} height={360}>
         <Pie
           data={chartData}
-          dataKey="users"
-          nameKey="browser"
+          cx="50%"
+          cy="50%"
           innerRadius={100}
-          strokeWidth={5}
+          outerRadius={140}
+          paddingAngle={2}
+          dataKey="value"
         >
+          {chartData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
           <Label
-            className="text-white"
             content={({ viewBox }) => {
-              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                return (
+              return (
+                <g>
                   <text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
+                    x={10}
+                    y={10}
                     textAnchor="middle"
-                    dominantBaseline="middle"
+                    dominantBaseline="central"
+                    className="fill-white text-2xl font-bold"
                   >
-                    <tspan
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      className="fill-foreground text-3xl font-bold"
-                    >
-                      {totalUsers.toLocaleString()}
-                    </tspan>
-                    <tspan
-                      x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 24}
-                      className="fill-muted-foreground text-white"
-                    >
-                      Users
-                    </tspan>
+                    {totalUsers.toLocaleString()}
                   </text>
-                );
-              }
+                  <text
+                    x={10}
+                    y={10 + 25}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    className="fill-gray-400 text-sm"
+                  >
+                    Total Users
+                  </text>
+                </g>
+              );
             }}
           />
         </Pie>
+        <Tooltip content={<CustomTooltip />} />
       </PieChart>
-    </ChartContainer>
+    </div>
   );
-};
+}
 
 export default CustomPieChart;

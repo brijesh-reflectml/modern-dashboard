@@ -1,125 +1,86 @@
-"use client"
+"use client";
 
-import React from 'react';
-import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, XAxis, YAxis } from "recharts"
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
+import React from "react";
+import { Bar, BarChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Cell } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CustomBarGraphProps {
-  variant?: 'default' | 'themed';
+  variant?: "default" | "themed";
 }
 
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
-]
+const chartDataOG = [
+  { name: "ChatGPT", value: 320, fill: "#10A37F" },
+  { name: "DALL-E", value: 245, fill: "#FF6F61" },
+  { name: "Stable Diffusion", value: 180, fill: "#6C63FF" },
+  { name: "MidJourney", value: 210, fill: "#F4A261" },
+  { name: "Hugging Face", value: 190, fill: "#FFCA28" },
+];
 
 const themedChartData = [
-    { browser: "chrome", visitors: 275, fill: "#3F4040" }, // Custom color
-    { browser: "safari", visitors: 200, fill: "#2A9D90" }, // Custom color
-    { browser: "firefox", visitors: 187, fill: "#3F4040" }, // Custom color
-    { browser: "edge", visitors: 173, fill: "#2A9D90" }, // Custom color
-    { browser: "other", visitors: 90, fill: "#3F4040" }, // Custom color
-  ]
+  { name: "ChatGPT", value: 320, fill: "#008080" },
+  { name: "DALL-E", value: 245, fill: "#006666" },
+  { name: "Stable Diffusion", value: 180, fill: "#CCCCCC" },
+  { name: "MidJourney", value: 210, fill: "#888888" },
+  { name: "Hugging Face", value: 190, fill: "#555555" },
+];
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10">
+        <p className="text-white font-medium">{payload[0].payload.name}</p>
+        <p className="text-gray-300">
+          {payload[0].value.toLocaleString()} users
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
-export function CustomBarGraph({ variant = 'default' }: CustomBarGraphProps) {
-  const chartData = variant === 'themed' ? themedChartData : [
-    { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-    { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-    { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-    { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-    { browser: "other", visitors: 90, fill: "var(--color-other)" },
-  ];
+export function CustomBarGraph({ variant = "default" }: CustomBarGraphProps) {
+  const chartData = variant === "themed" ? themedChartData : chartDataOG;
 
   return (
-    <Card className="max-w-lg " variant="ghost">
+    <Card className="w-full" variant="ghost">
       <CardHeader>
-        <CardTitle>Bar Chart - Mixed</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle className="text-white">Usage Statistics</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <div className="h-[300px] w-full">
           <BarChart
-            accessibilityLayer
+            width={500}
+            height={300}
             data={chartData}
-            layout="vertical"
             margin={{
-              left: 10,
-              right: 10,
-              top: 10,
-              bottom: 10,
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
             }}
           >
+            <XAxis
+              dataKey="name"
+              tick={{ fill: '#9CA3AF' }}
+              axisLine={{ stroke: '#374151' }}
+            />
             <YAxis
-              dataKey="browser"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) =>
-                chartConfig[value as keyof typeof chartConfig]?.label
-              }
+              tick={{ fill: '#9CA3AF' }}
+              axisLine={{ stroke: '#374151' }}
             />
-            <XAxis dataKey="visitors" type="number" hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="visitors" layout="vertical" radius={5} />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar
+              dataKey="value"
+              radius={[4, 4, 0, 0]}
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
           </BarChart>
-        </ChartContainer>
+        </div>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
     </Card>
-  )
+  );
 }
